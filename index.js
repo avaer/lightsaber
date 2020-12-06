@@ -314,7 +314,7 @@ const lightsaberMesh = await (async () => {
           .normalize()
           .multiplyScalar(0.001 + Math.random() * 0.001)
         particle.angularVelocity = new THREE.Vector3(Math.random()*Math.PI*2, Math.random()*Math.PI*2, Math.random()*Math.PI*2);
-        scene.add(particle);
+        app.object.add(particle);
         particle.endTime = now + Math.random() * 3000;
         particles.push(particle);
         lastParticleTime = now;
@@ -349,7 +349,7 @@ const lightsaberMesh = await (async () => {
         particle.scale.multiplyScalar(0.95);
         return true;
       } else {
-        scene.remove(particle);
+        particle.parent.remove(particle);
         return false;
       }
     });
