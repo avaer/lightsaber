@@ -428,7 +428,7 @@ const lightsaberMesh = await (async () => {
 
   app.addEventListener('terminate', () => {
     for (const particle of particles) {
-      scene.remove(particle);
+      particle.parent.remove(particle);
     }
   });
 
