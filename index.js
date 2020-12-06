@@ -325,6 +325,7 @@ const lightsaberMesh = await (async () => {
           topBladeMesh.position.clone()
             .add(
               new THREE.Vector3(0, 0, -Math.random() * (0.1 + factor*0.9))
+                .applyQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI/2))
                 // .applyQuaternion(object.quaternion)
             ),
           new THREE.Vector3(1, 1, 0)
@@ -334,6 +335,7 @@ const lightsaberMesh = await (async () => {
           sideBladeMesh.position.clone()
             .add(
               new THREE.Vector3((Math.random() < 0.5 ? 1 : -1) * (0.05 + Math.random() * 0.12*factor), 0, 0)
+                .applyQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI/2))
                 // .applyQuaternion(object.quaternion)
             ),
           new THREE.Vector3(0, 1, 1)
