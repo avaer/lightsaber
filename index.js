@@ -325,7 +325,7 @@ const lightsaberMesh = await (async () => {
           topBladeMesh.getWorldPosition(new THREE.Vector3())
             .add(
               new THREE.Vector3(0, 0, -Math.random() * (0.1 + factor*0.9))
-                .applyQuaternion(object.quaternion)
+                // .applyQuaternion(object.quaternion)
             ),
           new THREE.Vector3(1, 1, 0)
         );
@@ -334,7 +334,7 @@ const lightsaberMesh = await (async () => {
           sideBladeMesh.getWorldPosition(new THREE.Vector3())
             .add(
               new THREE.Vector3((Math.random() < 0.5 ? 1 : -1) * (0.05 + Math.random() * 0.12*factor), 0, 0)
-                .applyQuaternion(object.quaternion)
+                // .applyQuaternion(object.quaternion)
             ),
           new THREE.Vector3(0, 1, 1)
         );
