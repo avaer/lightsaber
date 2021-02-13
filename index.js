@@ -4,6 +4,13 @@ import {BufferGeometryUtils} from 'BufferGeometryUtils';
 import {renderer, scene, app} from 'app';
 import easing from './easing.js';
 
+// const color = 0xFF4040;
+const {
+  art: {
+    color,
+  },
+} = app.specification;
+
 function murmurhash(key, seed = 1) {
   var remainder, bytes, h1, h1b, c1, c1b, c2, c2b, k1, i;
   
@@ -216,7 +223,7 @@ const bladeMaterial = new THREE.ShaderMaterial({
     }
 
     void main() {
-      gl_FragColor = vec4(${new THREE.Color(0xFF4040).toArray().join(', ')}, 1.0);
+      gl_FragColor = vec4(${new THREE.Color(color).toArray().join(', ')}, 1.0);
       gl_FragColor.rgb *= (2.0 + uTime.x);
     }
   `,
