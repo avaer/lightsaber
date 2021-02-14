@@ -6,7 +6,7 @@
   "components": [
     {
       "type": "use",
-      "subtype": "gun",
+      "subtype": "swing",
       "useAnimation": "slash"
     }
   ]
