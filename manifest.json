@@ -6,7 +6,7 @@
   "components": [
     {
       "type": "swing",
-      "swingAnimation": "single"
+      "swingAnimation": "slash"
     }
   ]
 }
