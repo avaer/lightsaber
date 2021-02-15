@@ -1,0 +1,13 @@
+{
+  "name": "lightsaber",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/avaer/lightsaber",
+  "author": "avaer",
+  "license": "MIT",
+  "private": false,
+  "type": "module",
+  "scripts": {
+    "test": "node ./generatorTest.js"
+  }
+}
