@@ -10,7 +10,7 @@ const SaberType = [ "Light", "Dark" ]
 const SaberTypeRarity = [ 75, 25 ].map(n => n / 100)
 
 const BladeColor = {
-  Light : ["Blue", "Green", "Yellow", "Orange", "Purple", "Pink", "White" ],
+  Light : ["Blue", "Green", "Cyan", "Orange", "Purple", "Yellow", "White" ],
   Dark: ["Red", "Yellow", "Orange", "Purple", "Pink", "Silver", "Black"]
 };
 
@@ -19,44 +19,76 @@ const BladeColorRarity = {
   Dark: [46, 20, 18, 8, 5, 2.6, .4].map(n => n / 100)
 }
 
+// const EmitterType = {
+//   Light: ["Light_Emitter_1", "Light_Emitter_2", "Light_Emitter_3", "Light_Emitter_4", "Light_Emitter_5", "Light_Emitter_6", "Light_Emitter_7", "Light_Emitter_8", "Light_Emitter_9"],
+//   Dark: ["Dark_Emitter_1", "Dark_Emitter_2", "Dark_Emitter_3", "Dark_Emitter_4", "Dark_Emitter_5", "Dark_Emitter_6", "Dark_Emitter_7"]
+// }
+
+// const EmitterTypeRarity = {
+//   Light: [30, 26, 18, 14, 8, 3.9, .1].map(n => n / 100),
+//   Dark: [40, 30, 20, 9, .9, .1].map(n => n / 100)
+// }
+
+// const SwitchType = {
+//   Light: ["Light_Switch_1", "Light_Switch_2", "Light_Switch_3", "Light_Switch_4", "Light_Switch_5", "Light_Switch_6", "Light_Switch_7", "Light_Switch_8", "Light_Switch_9"],
+//   Dark: ["Dark_Switch_1", "Dark_Switch_2", "Dark_Switch_3", "Dark_Switch_4", "Dark_Switch_5", "Dark_Switch_6", "Dark_Switch_7"]
+// }
+
+// const SwitchTypeRarity = {
+//   Light: [24, 20, 18, 16, 12, 7, 2, .8, .2].map(n => n / 100),
+//   Dark: [28, 26, 22, 16, 5, 2.8, .2].map(n => n / 100)
+// }
+
+// const HandleType = {
+//   Light: ["Light_Handle_1", "Light_Handle_2", "Light_Handle_3", "Light_Handle_4", "Light_Handle_5", "Light_Handle_6", "Light_Handle_7", "Light_Handle_8", "Light_Handle_9"],
+//   Dark: ["Dark_Handle_1", "Dark_Handle_2", "Dark_Handle_3", "Dark_Handle_4", "Dark_Handle_5", "Dark_Handle_6", "Dark_Handle_7"]
+// }
+
+// const HandleTypeRarity = {
+//   Light: [24, 20, 18, 16, 12, 7, 2, .8, .2].map(n => n / 100),
+//   Dark: [28, 26, 22, 16, 5, 2.8, .2].map(n => n / 100)
+// }
+
+
+// Limited amount of items
 const EmitterType = {
-  Light: ["Light_Emitter_1", "Light_Emitter_2", "Light_Emitter_3", "Light_Emitter_4", "Light_Emitter_5", "Light_Emitter_6", "Light_Emitter_7", "Light_Emitter_8", "Light_Emitter_9"],
-  Dark: ["Dark_Emitter_1", "Dark_Emitter_2", "Dark_Emitter_3", "Dark_Emitter_4", "Dark_Emitter_5", "Dark_Emitter_6", "Dark_Emitter_7"]
+  Light: ["Light_Emitter_1", "Light_Emitter_2", "Light_Emitter_3"],
+  Dark: ["Dark_Emitter_1", "Dark_Emitter_2", "Dark_Emitter_3"]
 }
 
 const EmitterTypeRarity = {
-  Light: [30, 26, 18, 14, 8, 3.9, .1].map(n => n / 100),
-  Dark: [40, 30, 20, 9, .9, .1].map(n => n / 100)
+  Light: [40, 40, 20].map(n => n / 100),
+  Dark: [40, 40, 20].map(n => n / 100)
 }
 
 const SwitchType = {
-  Light: ["Light_Switch_1", "Light_Switch_2", "Light_Switch_3", "Light_Switch_4", "Light_Switch_5", "Light_Switch_6", "Light_Switch_7", "Light_Switch_8", "Light_Switch_9"],
-  Dark: ["Dark_Switch_1", "Dark_Switch_2", "Dark_Switch_3", "Dark_Switch_4", "Dark_Switch_5", "Dark_Switch_6", "Dark_Switch_7"]
+  Light: ["Light_Switch_1", "Light_Switch_2", "Light_Switch_3"],
+  Dark: ["Dark_Switch_1", "Dark_Switch_2", "Dark_Switch_3"]
 }
 
 const SwitchTypeRarity = {
-  Light: [24, 20, 18, 16, 12, 7, 2, .8, .2].map(n => n / 100),
-  Dark: [28, 26, 22, 16, 5, 2.8, .2].map(n => n / 100)
+  Light: [40, 40, 20].map(n => n / 100),
+  Dark: [40, 40, 20].map(n => n / 100)
 }
 
 const HandleType = {
-  Light: ["Light_Handle_1", "Light_Handle_2", "Light_Handle_3", "Light_Handle_4", "Light_Handle_5", "Light_Handle_6", "Light_Handle_7", "Light_Handle_8", "Light_Handle_9"],
-  Dark: ["Dark_Handle_1", "Dark_Handle_2", "Dark_Handle_3", "Dark_Handle_4", "Dark_Handle_5", "Dark_Handle_6", "Dark_Handle_7"]
+  Light: ["Light_Handle_1", "Light_Handle_2", "Light_Handle_3"],
+  Dark: ["Dark_Handle_1", "Dark_Handle_2", "Dark_Handle_3"]
 }
 
 const HandleTypeRarity = {
-  Light: [24, 20, 18, 16, 12, 7, 2, .8, .2].map(n => n / 100),
-  Dark: [28, 26, 22, 16, 5, 2.8, .2].map(n => n / 100)
+  Light: [40, 40, 20].map(n => n / 100),
+  Dark: [40, 40, 20].map(n => n / 100)
 }
 
 const SpecialFeature = {
-  Light: [ "None", "Pommel", "Guard", "ShortBlade"],
-  Dark: [ "None", "Pommel", "Crossguard", "DoubleSided" ]
+  Light: [ "None"],
+  Dark: [ "None"]
 }
 
 const SpecialFeatureRarity = {
-  Light: [90.5, 8, 1.25, .25].map(n => n / 100),
-  Dark: [80, 12, 6, 2].map(n => n / 100)
+  Light: [100].map(n => n / 100),
+  Dark: [100].map(n => n / 100)
 }
 
 const ColorScheme = {
