@@ -4,9 +4,10 @@ import { BufferGeometryUtils } from 'BufferGeometryUtils';
 import { renderer, app } from 'app';
 import easing from './easing.js';
 import generateLightsaberStats from "./generator.js";
+import { Vector3 } from 'three';
 
 const {
-  art: {},
+  art,
   stats
 } = app.specification;
 
@@ -82,8 +83,8 @@ const localEuler = new THREE.Euler();
 localEuler.order = 'YXZ';
 
 const {
-  // rarity,
-  // bladeType, // Light or Dark
+  rarity,
+  bladeType, // Light or Dark
   bladeColor,
   emitterType,
   switchType,
@@ -92,6 +93,16 @@ const {
   colorScheme
 } = generateLightsaberStats({art, stats})
 
+console.log("******** LIGHTSABER");
+console.log(
+  rarity,
+  bladeType,
+  bladeColor,
+  emitterType,
+  switchType,
+  handleType,
+  featureType,
+  colorScheme)
 
 const bladeMaterial = new THREE.ShaderMaterial({
   uniforms: {
@@ -201,25 +212,27 @@ const bladeMaterial = new THREE.ShaderMaterial({
 
 const lightsaberMesh = await (async () => {
   const object = new THREE.Object3D();
-
   const o = await new Promise((accept, reject) => {
-    new GLTFLoader().load(app.files['./lightsaber.glb'], function(oScene) {
-      oScene = oScene.scene;
-      oScene.traverse(o => {
-        if (o.isMesh) {
-          if(!(o.name === emitterType ||
-          o.name === switchType ||
-          o.name === handleType ||
-          o.name === featureType)){
-            oScene.remove(o)
-          } else {
-            o.frustumCulled = false;
+    new GLTFLoader().load(app.files['./lightsaber.glb'], function(o) {
+      const oScene = o.scene;
+      oScene.traverse(child => {
+        if(child.isMesh && (child.name.includes(emitterType) ||
+          child.name.includes(switchType) ||
+          child.name.includes(handleType) ||
+          child.name.includes(featureType) ||
+          child.name.includes("Core"))){
+            child.visible = true;
+          } else if(child.isMesh) {
+            child.visible = false;
           }
+        if (child.isMesh) {
+          child.frustumCulled = false;
         }
       });
       accept(oScene);
     }, undefined, reject);
   });
+
   object.add(o);
 
   const bladeLength = 1 * featureType === "ShortBlade" ? .6 : 1;
@@ -352,8 +365,11 @@ const lightsaberMesh = await (async () => {
         factor = cubicBezier(factor);
       }
       topBladeMesh.scale.set(1, 1, factor);
-      sideBladeMesh?.scale.set(factor, 1, 1);
-      topBladeMesh.visible = sideBladeMesh?.visible = factor > 0;
+      topBladeMesh.visible = factor > 0;
+      if(sideBladeMesh) {
+        sideBladeMesh.scale.set(factor, 1, 1);
+        sideBladeMesh.visible = topBladeMesh.visible;
+      }
       if (lerp >= 1) {
         animation = null;
       }
