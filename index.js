@@ -1,16 +1,28 @@
 import * as THREE from 'three';
-import {GLTFLoader} from 'GLTFLoader';
-import {BufferGeometryUtils} from 'BufferGeometryUtils';
-import {renderer, scene, app} from 'app';
+import { GLTFLoader } from 'GLTFLoader';
+import { BufferGeometryUtils } from 'BufferGeometryUtils';
+import { renderer, app } from 'app';
 import easing from './easing.js';
+import generateLightsaberStats from "./generator.js";
 
-// const color = 0xFF4040;
 const {
-  art: {
-    color,
-  },
+  art: {},
+  stats
 } = app.specification;
 
+const SaberColors = {
+  "Blue": "#0029FF",
+  "Green": "#00FF00",
+  "Cyan": "#00D1FF",
+  "Yellow": "#FAFF00",
+  "Orange": "#FF9900",
+  "Purple": "#AD00FF",
+  "Pink": "#F047FF",
+  "White": "#FFFFFF",
+  "Red": "#FF0000",
+  "Silver": "#AFAFAF",
+  "Black": "#000000"
+}
 function murmurhash(key, seed = 1) {
   var remainder, bytes, h1, h1b, c1, c1b, c2, c2b, k1, i;
   
@@ -66,62 +78,20 @@ function murmurhash(key, seed = 1) {
 const cubicBezier = easing(0, 1, 0, 1);
 
 (async () => {
-
-const localVector = new THREE.Vector3();
-const localVector2 = new THREE.Vector3();
-const localQuaternion = new THREE.Quaternion();
 const localEuler = new THREE.Euler();
 localEuler.order = 'YXZ';
-const localMatrix = new THREE.Matrix4();
-const localMatrix2 = new THREE.Matrix4();
-const localMatrixWorld = new THREE.Matrix4();
-const localVector2D = new THREE.Vector2();
 
-// const userId = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
+const {
+  // rarity,
+  // bladeType, // Light or Dark
+  bladeColor,
+  emitterType,
+  switchType,
+  handleType,
+  featureType,
+  colorScheme
+} = generateLightsaberStats({art, stats})
 
-/* const renderer = new THREE.WebGLRenderer({
-  antialias: true,
-  alpha: true,
-});
-// renderer.gammaOutput = true;
-// renderer.gammaFactor = 2.2;
-renderer.physicallyCorrectLights = true;
-// renderer.toneMappingExposure = 1;
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.sortObjects = false;
-// renderer.shadowMap.enabled = true;
-// renderer.shadowMap.type = THREE.PCFShadowMap;
-renderer.xr.enabled = true;
-document.body.appendChild(renderer.domElement);
-
-const scene = new THREE.Scene();
-scene.matrixAutoUpdate = false;
-
-const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
-scene.add(camera);
-
-const ambientLight = new THREE.AmbientLight(0xFFFFFF, 2);
-scene.add(ambientLight);
-
-const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 3);
-scene.add(directionalLight);
-
-const directionalLight2 = new THREE.DirectionalLight(0xFFFFFF, 3);
-scene.add(directionalLight2); */
-
-/* const cubeGeometry = new THREE.BoxBufferGeometry(0.1, 0.1, 0.1);
-const _makeCubeMesh = () => {
-  const geometry = cubeGeometry;
-  const material = new THREE.MeshPhongMaterial({
-    color: 0x333333,
-  });
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.frustumCulled = false;
-  return mesh;
-};
-const cubeMesh = _makeCubeMesh();
-scene.add(cubeMesh); */
 
 const bladeMaterial = new THREE.ShaderMaterial({
   uniforms: {
@@ -223,30 +193,39 @@ const bladeMaterial = new THREE.ShaderMaterial({
     }
 
     void main() {
-      gl_FragColor = vec4(${new THREE.Color(color).toArray().join(', ')}, 1.0);
+      gl_FragColor = vec4(${new THREE.Color(SaberColors[bladeColor]).toArray().join(', ')}, 1.0);
       gl_FragColor.rgb *= (2.0 + uTime.x);
     }
   `,
 });
+
 const lightsaberMesh = await (async () => {
   const object = new THREE.Object3D();
 
   const o = await new Promise((accept, reject) => {
-    new GLTFLoader().load(app.files['./lightsaber.glb'], function(o) {
-      o = o.scene;
-      o.traverse(o => {
+    new GLTFLoader().load(app.files['./lightsaber.glb'], function(oScene) {
+      oScene = oScene.scene;
+      oScene.traverse(o => {
         if (o.isMesh) {
-          o.frustumCulled = false;
+          if(!(o.name === emitterType ||
+          o.name === switchType ||
+          o.name === handleType ||
+          o.name === featureType)){
+            oScene.remove(o)
+          } else {
+            o.frustumCulled = false;
+          }
         }
       });
-      // console.log('loaded lightsaber', o);
-      accept(o);
+      accept(oScene);
     }, undefined, reject);
   });
   object.add(o);
 
+  const bladeLength = 1 * featureType === "ShortBlade" ? .6 : 1;
+
   const topBladeMesh = (() => {
-    const geometry = new THREE.BoxBufferGeometry(0.015, 0.015, 1, 1, 1, 100).applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, -1/2 - 0.165 + 0.145));
+    const geometry = new THREE.BoxBufferGeometry(0.015, 0.015, bladeLength, 1, 1, 100).applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, -1/2 - 0.165 + 0.145));
     const numAs = geometry.attributes.position.array.length/3;
     const as = new Float32Array(numAs);
     for (let i = 0; i < numAs; i++) {
@@ -268,35 +247,38 @@ const lightsaberMesh = await (async () => {
     return mesh;
   })();
   object.add(topBladeMesh);
-  const sideBladeMesh = (() => {
-    const baseGeometry = new THREE.BoxBufferGeometry(0.1, 0.01, 0.01, 10, 1, 1);
-    const numAs = baseGeometry.attributes.position.array.length/3;
-    const as = new Float32Array(numAs);
-    for (let i = 0; i < numAs; i++) {
-      as[i] = murmurhash(baseGeometry.attributes.position.array[i*3]);
-    }
-    baseGeometry.setAttribute('a', new THREE.BufferAttribute(as, 1));
+  let sideBladeMesh = null;
+  if(featureType === "CrossGuard"){
+    const sideBladeMesh = (() => {
+      const baseGeometry = new THREE.BoxBufferGeometry(0.1, 0.01, 0.01, 10, 1, 1);
+      const numAs = baseGeometry.attributes.position.array.length/3;
+      const as = new Float32Array(numAs);
+      for (let i = 0; i < numAs; i++) {
+        as[i] = murmurhash(baseGeometry.attributes.position.array[i*3]);
+      }
+      baseGeometry.setAttribute('a', new THREE.BufferAttribute(as, 1));
 
-    const geometry = BufferGeometryUtils.mergeBufferGeometries([
-      baseGeometry.clone().applyMatrix4(new THREE.Matrix4().makeTranslation(-0.1/2 - 0.06, 0, 0)),
-      baseGeometry.clone().applyMatrix4(new THREE.Matrix4().makeTranslation(0.1/2 + 0.06, 0, 0)),
-    ]);
-    
-    const ds = new Float32Array(geometry.attributes.position.array.length);
-    for (let i = 0; i < ds.length;) {
-      const j = i;
-      ds[i++] = 0;
-      ds[i++] = murmurhash(geometry.attributes.position.array[j] + 'a')/0xFFFFFFFF;
-      ds[i++] = murmurhash(geometry.attributes.position.array[j] + 'b')/0xFFFFFFFF;
-    }
-    geometry.setAttribute('d', new THREE.BufferAttribute(ds, 3));
-    const mesh = new THREE.Mesh(geometry, bladeMaterial);
-    mesh.position.z = -0.145;
-    mesh.visible = false;
-    mesh.frustumCulled = false;
-    return mesh;
-  })();
-  object.add(sideBladeMesh);
+      const geometry = BufferGeometryUtils.mergeBufferGeometries([
+        baseGeometry.clone().applyMatrix4(new THREE.Matrix4().makeTranslation(-0.1/2 - 0.06, 0, 0)),
+        baseGeometry.clone().applyMatrix4(new THREE.Matrix4().makeTranslation(0.1/2 + 0.06, 0, 0)),
+      ]);
+      
+      const ds = new Float32Array(geometry.attributes.position.array.length);
+      for (let i = 0; i < ds.length;) {
+        const j = i;
+        ds[i++] = 0;
+        ds[i++] = murmurhash(geometry.attributes.position.array[j] + 'a')/0xFFFFFFFF;
+        ds[i++] = murmurhash(geometry.attributes.position.array[j] + 'b')/0xFFFFFFFF;
+      }
+      geometry.setAttribute('d', new THREE.BufferAttribute(ds, 3));
+      const mesh = new THREE.Mesh(geometry, bladeMaterial);
+      mesh.position.z = -0.145;
+      mesh.visible = false;
+      mesh.frustumCulled = false;
+      return mesh;
+    })();
+    object.add(sideBladeMesh);
+  }
 
   const particleGeometry = new THREE.BoxBufferGeometry(0.02, 0.02, 0.02);
   let particles = [];
@@ -332,21 +314,20 @@ const lightsaberMesh = await (async () => {
           topBladeMesh.position.clone()
             .add(
               new THREE.Vector3(0, 0, -Math.random() * (0.1 + factor*0.9))
-                // .applyQuaternion(object.quaternion)
             ).applyQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI/2)),
           new THREE.Vector3(1, 1, 0)
         );
       } else {
-        _makeParticle(
-          sideBladeMesh.position.clone()
-            .add(
-              new THREE.Vector3((Math.random() < 0.5 ? 1 : -1) * (0.05 + Math.random() * 0.12*factor), 0, 0)
-                // .applyQuaternion(object.quaternion)
-            ).applyQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI/2)),
-          new THREE.Vector3(0, 1, 1)
-        );
+        if(sideBladeMesh){
+          _makeParticle(
+            sideBladeMesh.position.clone()
+              .add(
+                new THREE.Vector3((Math.random() < 0.5 ? 1 : -1) * (0.05 + Math.random() * 0.12*factor), 0, 0)
+              ).applyQuaternion(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI/2)),
+            new THREE.Vector3(0, 1, 1)
+          );
+        }
       }
-    // }
     particles = particles.filter(particle => {
       if (now < particle.endTime) {
         particle.position.add(particle.velocity);
@@ -371,8 +352,8 @@ const lightsaberMesh = await (async () => {
         factor = cubicBezier(factor);
       }
       topBladeMesh.scale.set(1, 1, factor);
-      sideBladeMesh.scale.set(factor, 1, 1);
-      topBladeMesh.visible = sideBladeMesh.visible = factor > 0;
+      sideBladeMesh?.scale.set(factor, 1, 1);
+      topBladeMesh.visible = sideBladeMesh?.visible = factor > 0;
       if (lerp >= 1) {
         animation = null;
       }
@@ -418,21 +399,6 @@ const lightsaberMesh = await (async () => {
     }
   };
 
-  /* object.grabIndex = -1;
-  window.document.dataset.addEventListener('change', e => {
-    const {key, value} = e.detail;
-    if (key === 'enabled') {
-      bladeMesh.visible = value;
-    }
-  });
-  object.setState = enabled => {
-    window.document.dataset.set('enabled', enabled);
-  };
-  object.getEquipper = () => window.document.dataset.get('equipper');
-  object.setEquipper = equipper => {
-    window.document.dataset.set('equipper', equipper);
-  }; */
-
   app.addEventListener('terminate', () => {
     for (const particle of particles) {
       particle.parent.remove(particle);
@@ -441,120 +407,16 @@ const lightsaberMesh = await (async () => {
 
   return object;
 })();
-// lightsaberMesh.position.y = 1;
 lightsaberMesh.rotation.order = 'YXZ';
 lightsaberMesh.rotation.x = Math.PI/2;
 app.object.add(lightsaberMesh);
 
-/* const cubeGeometry = new THREE.BoxBufferGeometry(0.02, 0.01, 0.05);
-const _makeCubeMesh = () => {
-  const geometry = cubeGeometry;
-  const material = new THREE.MeshPhongMaterial({
-    color: 0x333333,
-  });
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.frustumCulled = false;
-  return mesh;
-};
-const cubeMeshes = [
-  _makeCubeMesh(),
-  _makeCubeMesh(),
-];
-scene.add(cubeMeshes[0]);
-scene.add(cubeMeshes[1]); 
-
-const cameraCubeMesh = (() => {
-  const geometry = new THREE.BoxBufferGeometry(0.5, 0.5, 0.5);
-  const material = new THREE.MeshPhongMaterial({
-    color: 0x333333,
-  });
-  const mesh = new THREE.Mesh(geometry, material);
-  mesh.frustumCulled = false;
-  return mesh;
-})()
-// scene.add(cameraCubeMesh); */
-
-/* const session = await navigator.xr.requestSession();
-session.layers && session.layers.push(renderer.domElement);
-session.requestAnimationFrame((timestamp, frame) => {
-  renderer.vr.setSession(session, {
-    frameOfReferenceType: 'stage',
-  });
-
-  const pose = frame.getViewerPose();
-  const viewport = session.baseLayer.getViewport(pose.views[0]);
-  const height = viewport.height;
-  const fullWidth = (() => {
-    let result = 0;
-    for (let i = 0; i < pose.views.length; i++) {
-      result += session.baseLayer.getViewport(pose.views[i]).width;
-    }
-    return result;
-  })();
-  renderer.setSize(fullWidth, height);
-  renderer.setPixelRatio(1);
-
-  renderer.setAnimationLoop(null);
-
-  renderer.vr.enabled = true;
-  renderer.vr.setSession(session);
-  renderer.vr.setAnimationLoop(animate);
-}); */
-
-/* const lastPresseds = Array(cubeMeshes.length).fill(false);
-const lastGrabbeds = Array(cubeMeshes.length).fill(false);
-const _setMatrixWorld = matrixWorld => {
-  localMatrixWorld
-    .compose(
-      localVector.fromArray(window.document.xrOffset.position),
-      localQuaternion.fromArray(window.document.xrOffset.orientation),
-      localVector2.set(1, 1, 1)
-    )
-    .multiply(matrixWorld)
-    .decompose(localVector, localQuaternion, localVector2)
-  window.document.xrOffset.position = localVector.toArray();
-  window.document.xrOffset.orientation = localQuaternion.toArray();
-}; */
-let lastUpdateTime = Date.now();
 function animate() {
-  const now = Date.now();
-  const timeDiff = now - lastUpdateTime;
-
   bladeMaterial.uniforms.uTime.value.set(-1 + Math.random()*2, -1 + Math.random()*2, -1 + Math.random()*2);
-
-  // lightsaberMesh.rotation.x = Math.PI/2 + Math.sin((now%2000)/2000 * Math.PI*2)*0.1;
-  // lightsaberMesh.rotation.y = Math.sin((now%3000)/3000 * Math.PI*2);
   if (!lightsaberMesh.tick()) {
     lightsaberMesh.setState();
   }
-
-  /* if (lightsaberMesh.getEquipper() === userId) {
-    localMatrix
-      .copy(vrCamera.matrixWorld)
-      .premultiply(
-        localMatrix2.fromArray(window.document.xrOffset.matrix)//.getInverse(localMatrix2)
-      )
-      .decompose(localVector, localQuaternion, localVector2);
-
-    localEuler.setFromQuaternion(localQuaternion, localEuler.order);
-    localEuler.x = 0;
-    localEuler.z = 0;
-    localQuaternion.setFromEuler(localEuler);
-
-    localVector
-      .add(localVector2.set(0, -0.5, 0))
-      .add(
-        localVector2
-          .set(0.2, 0, 0)
-          .applyQuaternion(localQuaternion)
-      );
-
-    window.document.xrOffset.position = localVector.toArray();
-    window.document.xrOffset.orientation = localQuaternion.toArray();
-  } */
-
-  // renderer.render(scene, camera);
 }
-renderer.setAnimationLoop(animate);
 
+renderer.setAnimationLoop(animate);
 })();

@@ -10,7 +10,7 @@ const SaberType = [ "Light", "Dark" ]
 const SaberTypeRarity = [ 75, 25 ].map(n => n / 100)
 
 const BladeColor = {
-  Light : ["Blue", "Green", "Yellow", "Orange", "Purple", "Pink", "White" ],
+  Light : ["Blue", "Green", "Cyan", "Orange", "Purple", "Yellow", "White" ],
   Dark: ["Red", "Yellow", "Orange", "Purple", "Pink", "Silver", "Black"]
 };
 
